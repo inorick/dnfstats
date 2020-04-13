@@ -3,7 +3,7 @@ import sys
 
 
 def get_installed_packages():
-    packages = subprocess.run(['rpm', '-qa'], text=True, stdout=subprocess.PIPE)
+    packages = subprocess.run(['dnf', 'leaves'], text=True, stdout=subprocess.PIPE)
     packages = packages.stdout.split('\n')
     packages = [p.strip() for p in packages]
     return packages
@@ -46,6 +46,8 @@ def get_mandatory_and_default_packages(group):
 
 
 if __name__ == '__main__':
+    print("Getting list of installed packages")
+    installed_packages = get_installed_packages()
     print("Getting list of installed groups")
     installed_groups = get_installed_groups()
     print("Getting package lists of installed groups")
@@ -53,8 +55,6 @@ if __name__ == '__main__':
     for group in installed_groups:
         for package in get_mandatory_and_default_packages(group):
             group_packages.append(package)
-    print("Getting list of installed packages")
-    installed_packages = get_installed_packages()
 
     print("Missing packages (part of group but not installed):")
     missing_packages = list(set(group_packages) - set(installed_packages))
@@ -63,8 +63,8 @@ if __name__ == '__main__':
         print(p)
     print()
 
-    # print("Additional packages (part of group but not installed):")
-    # additional_packages = list(set(installed_packages) - set(group_packages))
-    # additional_packages.sort()
-    # for p in additional_packages:
-    #     print(p)
+    print("Additional packages (installed but not part of group):")
+    additional_packages = list(set(installed_packages) - set(group_packages))
+    additional_packages.sort()
+    for p in additional_packages:
+        print(p)
